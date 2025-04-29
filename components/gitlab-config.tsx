@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { GitlabConfig } from "@/types/gitlab"
 
 interface GitLabConfigProps {
-  onConfigSaved: (config: { token: string; groupId: string }) => void
+  onConfigSaved: (config: GitlabConfig) => void
 }
 
 export function GitLabConfig({ onConfigSaved }: GitLabConfigProps) {
@@ -28,30 +29,7 @@ export function GitLabConfig({ onConfigSaved }: GitLabConfigProps) {
       return
     }
 
-    try {
-      // Validate the token by making a test request to the GitLab API
-      const response = await fetch(`https://gitlab.com/api/v4/groups/${groupId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError("Invalid access token. Please check your GitLab access token.")
-        } else if (response.status === 404) {
-          setError("Group not found. Please check your group ID.")
-        } else {
-          setError(`Error: ${response.status} - ${response.statusText}`)
-        }
-        return
-      }
-
-      onConfigSaved({ token, groupId })
-    } catch (err) {
-      setError("Failed to connect to GitLab API. Please check your network connection.")
-    }
+    onConfigSaved({ token, groupId });
   }
 
   return (
@@ -74,7 +52,7 @@ export function GitLabConfig({ onConfigSaved }: GitLabConfigProps) {
             <Label htmlFor="token">GitLab Access Token</Label>
             <Input
               id="token"
-              type="password"
+              type="text"
               placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
               value={token}
               onChange={(e) => setToken(e.target.value)}
